@@ -1,0 +1,20 @@
+* {
+  color: white;
+}
+
+body {
+  background-color: rgba(39, 42, 46, 1);
+}
+
+.summoner-form:focus {
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+}
+
+.summoner-form {
+  border: 2px solid rgba(108, 117, 125, 1) !important;
+}
+
+th,
+td {
+  border-color: #3b3c3e; /* set the color of the border */
+}

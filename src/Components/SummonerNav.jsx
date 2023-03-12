@@ -17,10 +17,9 @@ export default function SummonerNav({
 }) {
   return (
     <Navbar
-      bg="light"
+      bg="dark"
       expand="lg"
-      sticky="top"
-      className="border-bottom">
+      sticky="top">
       <Container fluid>
         <Navbar.Brand href="#">
           <img
@@ -41,11 +40,11 @@ export default function SummonerNav({
               <Dropdown>
                 <Dropdown.Toggle
                   value={selectedRegion}
-                  variant="outline-success"
+                  variant="outline-secondary"
                   id="region-dropdown">
                   {selectedRegion || "EUW1"}
                 </Dropdown.Toggle>
-                <Dropdown.Menu>
+                <Dropdown.Menu variant="dark">
                   {regions.map((region) => (
                     <Dropdown.Item
                       key={region}
@@ -57,13 +56,12 @@ export default function SummonerNav({
                 </Dropdown.Menu>
               </Dropdown>
               <Form.Control
+                className="bg-dark text-white summoner-form"
                 placeholder="Summoner Name"
-                aria-label="Recipient's username"
-                aria-describedby="basic-addon2"
                 onChange={(e) => setSummonerName(e.target.value)}
               />
               <Button
-                variant="outline-success"
+                variant="outline-secondary"
                 onClick={(e) => handleSubmit(e)}>
                 Search
               </Button>

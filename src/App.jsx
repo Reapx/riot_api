@@ -3,6 +3,7 @@ import axios from "axios";
 import SummonerNav from "./Components/SummonerNav";
 import SummonerLiveGame from "./Components/SummonerLiveGame";
 import SummonerSite from "./Components/SummonerSite";
+import { Button } from "react-bootstrap";
 
 export default function App() {
   const [summonerName, setSummonerName] = useState("");
@@ -74,12 +75,17 @@ export default function App() {
         setSummonerName={setSummonerName}
         handleSubmit={handleSubmit}
       />
-      {summoner.length > 0 && (
+      <Button
+        variant="outline-success"
+        onClick={(e) => handleSpectate(e)}>
+        Live Game
+      </Button>
+      {/* {summoner.length > 0 && (
         <SummonerSite
           summoner={summoner}
           handleSpectate={handleSpectate}
         />
-      )}
+      )} */}
       {Object.keys(spectater).length > 0 && (
         <SummonerLiveGame spectater={spectater} />
       )}

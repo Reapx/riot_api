@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState, useCallback } from "react";
-import { Container, Table } from "react-bootstrap";
+import { Button, Container, Table } from "react-bootstrap";
+import WinrateBar from "./WinrateBar";
 
 export default function SummonerLiveGame({ spectater }) {
   const [championData, setChampionData] = useState({});
@@ -9,6 +10,17 @@ export default function SummonerLiveGame({ spectater }) {
   const [summonerData, setSummonerData] = useState([]);
   const [gameVersion, setGameVersion] = useState(["13.4.1"]);
   const [summonerDataFetched, setSummonerDataFetched] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+
+  const handleShowRunesClick = (spectate) => {
+    setSelectedRow((prevSelectedRow) => {
+      if (prevSelectedRow === spectate) {
+        return null;
+      } else {
+        return spectate;
+      }
+    });
+  };
 
   const fetchGameVersion = useCallback(async () => {
     try {
@@ -66,23 +78,6 @@ export default function SummonerLiveGame({ spectater }) {
     fetchRunesData,
   ]);
 
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     console.log(spectater);
-  //     const promises = spectater.participants.map(async (summoner) => {
-  //       console.log(summoner);
-  //       const data = await fetchSummonerData(
-  //         spectater.platformId.toLowerCase(),
-  //         summoner.summonerName
-  //       );
-  //       return data;
-  //     });
-  //     const results = await Promise.all(promises);
-  //     setSummonerData(results.filter((data) => data !== undefined));
-  //   }
-  //   fetchData();
-  // }, [spectater]);
-
   const getId = (id, object) => {
     const element = Object.values(object).find(
       (element) => element.key === String(id)
@@ -90,7 +85,22 @@ export default function SummonerLiveGame({ spectater }) {
     return element ? element.id : "";
   };
 
-  const getRune = (keyStone, subRunes, object) => {
+  const getRune = (keyStone, subRunes, object, statmods) => {
+    if (statmods) {
+      if (subRunes === 5008) {
+        return "perk-images/StatMods/StatModsAdaptiveForceIcon.png";
+      } else if (subRunes === 5005) {
+        return "perk-images/StatMods/StatModsAttackSpeedIcon.png";
+      } else if (subRunes === 5007) {
+        return "perk-images/StatMods/StatModsCDRScalingIcon.png";
+      } else if (subRunes === 5002) {
+        return "perk-images/StatMods/StatModsArmorIcon.png";
+      } else if (subRunes === 5003) {
+        return "perk-images/StatMods/StatModsHealthScalingIcon.png";
+      } else if (subRunes === 5001) {
+        return "perk-images/StatMods/StatModsHealthScalingIcon.png";
+      }
+    }
     if (!object) {
       return "";
     }
@@ -115,7 +125,6 @@ export default function SummonerLiveGame({ spectater }) {
   };
 
   const fetchSummonerData = async (region, summoner) => {
-    console.log(region, summoner);
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();
@@ -134,11 +143,9 @@ export default function SummonerLiveGame({ spectater }) {
           return element;
         }
       }
-      // If no data for ranked solo queue is found, return an error message
       return { error: "No data found for ranked solo queue" };
     } catch (error) {
       console.error(error);
-      // Return an error message if there is an error
       return { error: "An error occurred while fetching summoner data" };
     }
   };
@@ -187,98 +194,193 @@ export default function SummonerLiveGame({ spectater }) {
     }
   };
 
-  return (
-    <Container fluid>
-      <Table striped="columns">
-        <tbody>
-          {spectater.participants.map((spectate) => {
-            let summoner = filterSummoners(spectate.summonerId);
-            return (
-              <tr
-                key={spectate.summonerId}
+  const teamRows = (spectate, team) => {
+    if (spectate.teamId === team) {
+      let summoner = filterSummoners(spectate.summonerId);
+      return (
+        <>
+          <tr
+            key={spectate.summonerId}
+            style={{
+              borderLeft:
+                +spectate.teamId === 100
+                  ? "5px solid #00BBFB"
+                  : "5px solid #FB4545",
+            }}>
+            <td style={{ width: "100px", verticalAlign: "middle" }}>
+              <img
+                src={`http://ddragon.leagueoflegends.com/cdn/${
+                  gameVersion[0]
+                }/img/champion/${getId(spectate.championId, championData)}.png`}
+                alt={getId(spectate.championId, championData)}
                 style={{
-                  borderLeft:
-                    +spectate.teamId === 100
-                      ? "5px solid #00BBFB"
-                      : "5px solid #FB4545",
+                  width: "50px",
+                  height: "auto",
+                  borderRadius: "5px",
+                }}
+              />
+              <div
+                style={{
+                  display: "inline-block",
+                  verticalAlign: "middle",
+                  marginLeft: "5px",
                 }}>
-                <td>
-                  <img
-                    src={`http://ddragon.leagueoflegends.com/cdn/${
-                      gameVersion[0]
-                    }/img/champion/${getId(
-                      spectate.championId,
-                      championData
-                    )}.png`}
-                    alt={getId(spectate.championId, championData)}
+                <img
+                  src={`http://ddragon.leagueoflegends.com/cdn/${
+                    gameVersion[0]
+                  }/img/spell/${getId(
+                    spectate.spell1Id,
+                    summonerSpellData
+                  )}.png`}
+                  alt={getId(spectate.spell1Id, summonerSpellData)}
+                  style={{
+                    width: "25px",
+                    height: "auto",
+                    borderRadius: "5px",
+                    display: "block",
+                  }}
+                />
+                <img
+                  src={`http://ddragon.leagueoflegends.com/cdn/${
+                    gameVersion[0]
+                  }/img/spell/${getId(
+                    spectate.spell2Id,
+                    summonerSpellData
+                  )}.png`}
+                  alt={getId(spectate.spell2Id, summonerSpellData)}
+                  style={{
+                    width: "25px",
+                    height: "auto",
+                    borderRadius: "5px",
+                    display: "block",
+                  }}
+                />
+              </div>
+            </td>
+            <td style={{ verticalAlign: "middle", width: "375px" }}>
+              <strong>{spectate.summonerName}</strong>
+            </td>
+            <td>
+              {summoner != null && (
+                <div style={{ textAlign: "center" }}>
+                  <span>
+                    <img
+                      src={`./rank-images/${summoner.tier}.png`}
+                      alt=""
+                      style={{ width: "50px", height: "auto" }}
+                    />
+                    {["MASTER", "GRANDMASTER", "CHALLENGER"].includes(
+                      summoner.tier
+                    ) ? (
+                      <span>
+                        {summoner.tier.charAt(0) +
+                          summoner.tier.slice(1).toLowerCase()}{" "}
+                        - {summoner.leaguePoints} LP
+                      </span>
+                    ) : (
+                      <span>
+                        {summoner.tier.charAt(0) +
+                          summoner.tier.slice(1).toLowerCase()}{" "}
+                        {summoner.rank} - {summoner.leaguePoints} LP
+                      </span>
+                    )}
+                  </span>
+                  <WinrateBar
+                    winrate={calculateWR(summoner.wins, summoner.losses)}
+                    totalWins={summoner.wins}
+                    totalLosses={summoner.losses}
                   />
-                </td>
-                <td>
-                  <img
-                    src={`http://ddragon.leagueoflegends.com/cdn/${
-                      gameVersion[0]
-                    }/img/spell/${getId(
-                      spectate.spell1Id,
-                      summonerSpellData
-                    )}.png`}
-                    alt={getId(spectate.spell1Id, summonerSpellData)}
-                  />
-                  <img
-                    src={`http://ddragon.leagueoflegends.com/cdn/${
-                      gameVersion[0]
-                    }/img/spell/${getId(
-                      spectate.spell2Id,
-                      summonerSpellData
-                    )}.png`}
-                    alt={getId(spectate.spell2Id, summonerSpellData)}
-                  />
-                </td>
-                <td>
-                  <p>{spectate.summonerName}</p>
-                </td>
-                <td>
-                  {summoner != null && (
-                    <div>
-                      <p>
-                        {summoner.tier} {summoner.rank} -{summoner.leaguePoints}{" "}
-                        LP
-                      </p>
-                      <p>
-                        Wins: {summoner.wins} - Losses: {summoner.losses}
-                      </p>
-                      <p>
-                        Win-Rate: {calculateWR(summoner.wins, summoner.losses)}
-                      </p>
-                    </div>
-                  )}
-                </td>
-                <td>
+                </div>
+              )}
+            </td>
+            <td
+              style={{
+                verticalAlign: "middle",
+              }}
+              className="text-center">
+              <Button
+                variant="outline-secondary"
+                className="rounded-0"
+                onClick={() => handleShowRunesClick(spectate.summonerId)}>
+                Show Runes
+              </Button>
+            </td>
+          </tr>
+          {selectedRow === spectate.summonerId && (
+            <tr style={{ borderLeft: "5px solid #35383d" }}>
+              <td colSpan={4}>
+                <div style={{ whiteSpace: "nowrap" }}>
                   {spectate.perks.perkIds.map((perkId, index) => (
-                    <div key={index}>
-                      <img
-                        src={`./${getRune(
-                          spectate.perks.perkStyle,
-                          perkId,
-                          runesData
-                        )}`}
-                        alt=""
-                      />
-                      <img
-                        src={`./${getRune(
-                          spectate.perks.perkSubStyle,
-                          perkId,
-                          runesData
-                        )}`}
-                        alt=""
-                      />
+                    <div
+                      key={index}
+                      style={{ display: "inline-block" }}>
+                      {getRune(
+                        spectate.perks.perkSubStyle,
+                        perkId,
+                        runesData,
+                        false
+                      ) === "" ? (
+                        <img
+                          src={`./${getRune(
+                            spectate.perks.perkStyle,
+                            perkId,
+                            runesData,
+                            true
+                          )}`}
+                          alt=""
+                        />
+                      ) : (
+                        <img
+                          src={`./${getRune(
+                            spectate.perks.perkSubStyle,
+                            perkId,
+                            runesData,
+                            false
+                          )}`}
+                          alt=""
+                        />
+                      )}
                     </div>
                   ))}
-                </td>
+                </div>
+              </td>
+            </tr>
+          )}
+        </>
+      );
+    }
+  };
+  let teamId = 0;
+  return (
+    <Container>
+      {[...Array(2)].map((_, i) => {
+        teamId += 100;
+        return (
+          <Table
+            key={i}
+            hover>
+            <thead>
+              <tr>
+                <th>
+                  {teamId === 100 ? (
+                    <strong style={{ color: "#00BBFB" }}>Blue Team</strong>
+                  ) : (
+                    <strong style={{ color: "#FB4545" }}>Red Team</strong>
+                  )}
+                </th>
+                <th>Summoner</th>
+                <th>Season 2023 Winrate</th>
+                <th>Runes</th>
               </tr>
-            );
-          })}
-        </tbody>
-      </Table>
+            </thead>
+            <tbody>
+              {spectater.participants.map((spectate) => {
+                return teamRows(spectate, teamId);
+              })}
+            </tbody>
+          </Table>
+        );
+      })}
     </Container>
   );
 }
